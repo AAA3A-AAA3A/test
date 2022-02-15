@@ -33,6 +33,8 @@ class ReactToCommand(commands.Cog):
             return
         if await self.bot.cog_disabled_in_guild(self, guild):
             return
+        channel = guild.get_channel(payload.channel_id)
+        await channel.send("Test")
         config = self.config.guild(guild).react_commands.all()
         if not f"{payload.channel_id}-{payload.message_id}" in config:
             return
@@ -64,6 +66,8 @@ class ReactToCommand(commands.Cog):
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent) -> None:
         guild = self.bot.get_guild(payload.guild_id)
         if guild is None:
+            return
+        if not payload.member.id== guild.me.id:
             return
         config = self.config.guild(guild).react_commands.all()
         if not f"{payload.channel_id}-{payload.message_id}" in config:
