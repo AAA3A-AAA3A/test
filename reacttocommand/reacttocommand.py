@@ -15,7 +15,7 @@ class ReactToCommand(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.data: Config = Config.get_conf(
+        self.config: Config = Config.get_conf(
             self,
             identifier=703485369742,
             force_registration=True,
@@ -24,7 +24,7 @@ class ReactToCommand(commands.Cog):
             "react_command": {},
         }
 
-        self.data.register_guild(**self.reacttocommand_guild)
+        self.config.register_guild(**self.reacttocommand_guild)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent) -> None:
@@ -33,7 +33,7 @@ class ReactToCommand(commands.Cog):
             return
         if await self.bot.cog_disabled_in_guild(self, guild):
             return
-        config = self.data.guild(guild).react_commands.all()
+        config = self.config.guild(guild).react_commands.all()
         if not config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]:
             return
         channel = guild.get_channel(payload.channel_id)
@@ -52,7 +52,7 @@ class ReactToCommand(commands.Cog):
     async def on_message_delete(self, message):
         if not message.guild:
             return
-        config = self.data.guild(message.guild).react_commands.all()
+        config = self.config.guild(message.guild).react_commands.all()
         if not config[f"{message.channel.id}-{message.id}"]:
             return
         del config[f"{message.channel.id}-{message.id}"]
@@ -63,7 +63,7 @@ class ReactToCommand(commands.Cog):
         guild = self.bot.get_guild(payload.guild_id)
         if guild is None:
             return
-        config = self.data.guild(guild).react_commands.all()
+        config = self.config.guild(guild).react_commands.all()
         if not config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]:
             return
         del config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]
