@@ -36,8 +36,8 @@ class ReactToCommand(commands.Cog):
         config = self.config.guild(guild).react_commands.all()
         if not f"{payload.channel_id}-{payload.message_id}" in config:
             return
-        if not f"{payload.emoji}" in config[f"{payload.channel_id}-{payload.message_id}"]:
-            return
+        #if not f"{payload.emoji}" in config[f"{payload.channel_id}-{payload.message_id}"]:
+            #return
         channel = guild.get_channel(payload.channel_id)
         message = copy(await channel.fetch_message(payload.message_id))
         permissions = channel.permissions_for(payload.member)
