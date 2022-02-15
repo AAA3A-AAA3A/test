@@ -97,6 +97,8 @@ class ReactToCommand(commands.Cog):
             return
         await start_adding_reactions(message, [react])
         config = await self.config.guild(ctx.guild).react_command.all()
+        if not config[f"{message.channel.id}-{message.id}"]:
+            config[f"{message.channel.id}-{message.id}"] = {}
         config[f"{message.channel.id}-{message.id}"][f"{react}"] = command
         await self.config.guild(ctx.guild).react_command.set(config)
         await ctx.tick()
