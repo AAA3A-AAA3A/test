@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 import typing
 from redbot.core import commands, Config
 from copy import copy
@@ -41,6 +41,10 @@ class ReactToCommand(commands.Cog):
         permissions = channel.permissions_for(payload.member)
         if not permissions.read_message_history or not permissions.read_messages or not permissions.send_messages or not permissions.view_channel:
             return
+        p = await self.bot.get_valid_prefixes()
+        p = p[0]
+        command = config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]
+        message.content = f"{p}{command}"
         new_ctx = await self.bot.get_context(message)
         await self.bot.invoke(new_ctx)
 
