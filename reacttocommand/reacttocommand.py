@@ -34,7 +34,9 @@ class ReactToCommand(commands.Cog):
         if await self.bot.cog_disabled_in_guild(self, guild):
             return
         config = self.config.guild(guild).react_commands.all()
-        if not config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]:
+        if not f"{payload.channel_id}-{payload.message_id}" in config:
+            return
+        if not f"{payload.emoji}" in config[f"{payload.channel_id}-{payload.message_id}"]:
             return
         channel = guild.get_channel(payload.channel_id)
         message = copy(await channel.fetch_message(payload.message_id))
@@ -53,7 +55,7 @@ class ReactToCommand(commands.Cog):
         if not message.guild:
             return
         config = self.config.guild(message.guild).react_commands.all()
-        if not config[f"{message.channel.id}-{message.id}"]:
+        if not [f"{message.channel.id}-{message.id}"] in config:
             return
         del config[f"{message.channel.id}-{message.id}"]
         await self.config.guild(message.guild).react_command.set(config)
@@ -64,7 +66,9 @@ class ReactToCommand(commands.Cog):
         if guild is None:
             return
         config = self.config.guild(guild).react_commands.all()
-        if not config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]:
+        if not f"{payload.channel_id}-{payload.message_id}" in config:
+            return
+        if not f"{payload.emoji}" in config[f"{payload.channel_id}-{payload.message_id}"]:
             return
         del config[f"{payload.channel_id}-{payload.message_id}"][f"{payload.emoji}"]
         await self.config.guild(guild).react_command.set(config)
@@ -101,7 +105,7 @@ class ReactToCommand(commands.Cog):
             await ctx.send("An error has occurred. It is possible that the emoji you provided is invalid.")
             return
         config = await self.config.guild(ctx.guild).react_command.all()
-        if not config[f"{message.channel.id}-{message.id}"]:
+        if not f"{message.channel.id}-{message.id}" in config:
             config[f"{message.channel.id}-{message.id}"] = {}
         config[f"{message.channel.id}-{message.id}"][f"{react}"] = command
         await self.config.guild(ctx.guild).react_command.set(config)
@@ -115,10 +119,10 @@ class ReactToCommand(commands.Cog):
         """
         await start_adding_reactions(message, [react])
         config = await self.config.guild(ctx.guild).react_command.all()
-        if not config[f"{message.channel.id}-{message.id}"]:
+        if not f"{message.channel.id}-{message.id}" in config:
             await ctx.send("No command-reaction is configured for this message.")
             return
-        if not config[f"{message.channel.id}-{message.id}"][f"{react}"]:
+        if not f"{react}" in config[f"{message.channel.id}-{message.id}"]:
             await ctx.send("I wasn't watching for this reaction on this message.")
             return
         del config[f"{message.channel.id}-{message.id}"][f"{react}"]
@@ -138,7 +142,7 @@ class ReactToCommand(commands.Cog):
         """Clear all commands-reactions to a message.
         """
         config = await self.config.guild(ctx.guild).react_command.all()
-        if not config[f"{message.channel.id}-{message.id}"]:
+        if not f"{message.channel.id}-{message.id}" in config:
             await ctx.send("No command-reaction is configured for this message.")
             return
         for react in config[f"{message.channel.id}-{message.id}"]:
