@@ -95,7 +95,11 @@ class ReactToCommand(commands.Cog):
         if not new_ctx.valid:
             await ctx.send("You have not specified a correct command.")
             return
-        await start_adding_reactions(message, [react])
+        try:
+            await start_adding_reactions(message, [react])
+        except discord.HTTPException:
+            await ctx.send("An error has occurred. It is possible that the emoji you provided is invalid.")
+            return
         config = await self.config.guild(ctx.guild).react_command.all()
         if not config[f"{message.channel.id}-{message.id}"]:
             config[f"{message.channel.id}-{message.id}"] = {}
