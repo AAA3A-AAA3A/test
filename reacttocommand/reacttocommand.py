@@ -31,13 +31,16 @@ class ReactToCommand(commands.Cog):
         guild = self.bot.get_guild(payload.guild_id)
         if guild is None:
             return
+        if member.bot:
+            return
         if await self.bot.cog_disabled_in_guild(self, guild):
             return
         channel = guild.get_channel(payload.channel_id)
-        await channel.send("Test")
         config = self.config.guild(guild).react_commands.all()
         if not f"{payload.channel_id}-{payload.message_id}" in config:
+            await channel.send("Testa")
             return
+        await channel.send("Test")
         #if not f"{payload.emoji}" in config[f"{payload.channel_id}-{payload.message_id}"]:
             #return
         channel = guild.get_channel(payload.channel_id)
