@@ -79,7 +79,7 @@ class ReactToCommand(commands.Cog):
     @commands.guild_only()
     @commands.guildowner_or_permissions(administrator=True)
     @reacttocommand.command()
-    async def add(self, ctx, message: discord.Message, react: discord.Reaction, *, command: str):
+    async def add(self, ctx, message: discord.Message, react: discord.Emoji, *, command: str):
         """Add a command-reaction to a message.
         There should be no prefix in the command.
         The command will be invoked with the permissions of the user who clicked on the reaction.
@@ -104,7 +104,7 @@ class ReactToCommand(commands.Cog):
     @commands.guild_only()
     @commands.guildowner_or_permissions(administrator=True)
     @reacttocommand.command()
-    async def remove(self, ctx, message: discord.Message, react: discord.Reaction):
+    async def remove(self, ctx, message: discord.Message, react: discord.Emoji):
         """Remove a command-reaction to a message.
         """
         await start_adding_reactions(message, [react])
