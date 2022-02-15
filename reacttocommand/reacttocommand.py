@@ -96,7 +96,7 @@ class ReactToCommand(commands.Cog):
             await ctx.send("You have not specified a correct command.")
             return
         await start_adding_reactions(message, [react])
-        config = self.config.guild(ctx.guild).react_command.all()
+        config = await self.config.guild(ctx.guild).react_command.all()
         config[f"{message.channel.id}-{message.id}"][f"{react}"] = command
         await self.config.guild(ctx.guild).react_command.set(config)
         await ctx.tick()
@@ -108,7 +108,7 @@ class ReactToCommand(commands.Cog):
         """Remove a command-reaction to a message.
         """
         await start_adding_reactions(message, [react])
-        config = self.config.guild(ctx.guild).react_command.all()
+        config = await self.config.guild(ctx.guild).react_command.all()
         if not config[f"{message.channel.id}-{message.id}"]:
             await ctx.send("No command-reaction is configured for this message.")
             return
@@ -131,7 +131,7 @@ class ReactToCommand(commands.Cog):
     async def clear(self, ctx, message: discord.Message):
         """Clear all commands-reactions to a message.
         """
-        config = self.config.guild(ctx.guild).react_command.all()
+        config = await self.config.guild(ctx.guild).react_command.all()
         if not config[f"{message.channel.id}-{message.id}"]:
             await ctx.send("No command-reaction is configured for this message.")
             return
