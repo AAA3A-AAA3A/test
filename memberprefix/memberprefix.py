@@ -37,8 +37,8 @@ class MemberPrefix(commands.Cog):
         config = await self.config.member(ctx.author).all()
         if config["custom_prefixes"] == []:
             return
-        if ctx.message in self.cache_messages:
-            self.cache_messages.remove(ctx.message)
+        if ctx.message.id in self.cache_messages:
+            self.cache_messages.remove(ctx.message.id)
             return
         raise
 
@@ -56,7 +56,7 @@ class MemberPrefix(commands.Cog):
         if ctx is None:
             return
         if ctx.valid:
-            self.cache_messages.append(ctx.message)
+            self.cache_messages.append(ctx.message.id)
             await self.bot.invoke(ctx)
 
     @commands.command(aliases=["memberprefixes"])
