@@ -28,18 +28,15 @@ class MemberPrefix(commands.Cog):
         self.bot.before_invoke(self.before_invoke)
 
     async def cog_unload(self):
-        self.bot.remove_before_invoke_hook()
+        self.bot.remove_before_invoke_hook(self.before_invoke)
 
     async def before_invoke(self, ctx) -> None:
-        try:
-            if ctx.guild is None:
-                return
-            config = await self.config.member(ctx.author).all()
-            if config["custom_prefixes"] == []:
-                return
-            raise
-        except Exception:
+        if ctx.guild is None:
             return
+        config = await self.config.member(ctx.author).all()
+        if config["custom_prefixes"] == []:
+            return
+        raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
