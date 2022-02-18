@@ -79,7 +79,7 @@ class MemberPrefix(commands.Cog):
             )
             return
         await self.config.member(ctx.author).custom_prefixes.set(prefixes)
-        if len(prefixes) == 1:
+        if len(prefixes) == 0 or 1:
             await ctx.send("Prefix for you only set.")
         else:
             await ctx.send("Prefixes for you only set.")
