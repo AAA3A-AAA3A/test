@@ -1,7 +1,7 @@
-﻿import discord
+import discord
 import typing
 from redbot.core import commands, Config
-from redbot.core.bot import Bot
+from redbot.core.bot import Red as Bot
 
 # Credits:
 # The idea for this cog came from @OnlyEli on Red cogs support! (https://discord.com/channels/240154543684321280/430582201113903114/944075297127538730)
@@ -25,19 +25,33 @@ class MemberPrefix(commands.Cog):
 
         self.config.register_member(**self.memberprefix_member)
 
-    @Bot.before_invoke()
+        self.bot.before_invoke(self.before_invoke)
+
+    async def cog_unload(self):
+        self.bot.remove_before_invoke_hook()
+
     async def before_invoke(self, ctx) -> None:
-        config = await self.config.member(ctx.author).custom_prefixes.all()
-        if config["custom_prefixes"] == []:
+        try:
+            if ctx.guild is None:
+                return
+            config = await self.config.member(ctx.author).all()
+            if config["custom_prefixes"] == []:
+                return
+            raise
+        except Exception:
             return
-        raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        config = await self.config.member(message.author).custom_prefixes.all()
-        if config["custom_prefixes"] == []:
+        if message.guild is None:
             return
-        ctx = self.get_context_with_custom_prefixes(message, config["custom_prefixes"], discord.ext.commands.context.Context)
+        config = await self.config.member(message.author).all()
+        if not config["custom_prefixes"] == []:
+            prefixes = config["custom_prefixes"]
+        else:
+            prefixes = await self.bot.get_valid_prefixes(message.guild)
+            return
+        ctx = await self.get_context_with_custom_prefixes(message=message, prefixes=prefixes, cls=commands.context.Context)
         if ctx is None:
             return
         if ctx.valid:
@@ -68,7 +82,7 @@ class MemberPrefix(commands.Cog):
         else:
             await ctx.send("Prefixes for you only set.")
 
-    async def get_context_with_custom_prefixes(self, message: discord.Message, prefixes: typing.List, *, cls=discord.ext.commands.context.Context):
+    async def get_context_with_custom_prefixes(self, message: discord.Message, prefixes: typing.List, *, cls=commands.context.Context):
         r"""|coro|
         Returns the invocation context from the message.
         This is a more low-level counter-part for :meth:`.process_commands`
@@ -94,9 +108,9 @@ class MemberPrefix(commands.Cog):
         """
 
         view = discord.ext.commands.view.StringView(message.content)
-        ctx = cls(prefix=None, view=view, bot=self, message=message)
+        ctx = cls(prefix=None, view=view, bot=self.bot, message=message)
 
-        if self.bot._skip_check(message.author.id, self.user.id):
+        if self.bot._skip_check(message.author.id, self.bot.user.id):
             return ctx
 
         prefix = prefixes
