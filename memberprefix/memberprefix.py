@@ -25,6 +25,7 @@ class MemberPrefix(commands.Cog):
 
         self.config.register_member(**self.memberprefix_member)
 
+        self.cache_messages = []
         self.bot.before_invoke(self.before_invoke)
 
     async def cog_unload(self):
@@ -35,6 +36,9 @@ class MemberPrefix(commands.Cog):
             return
         config = await self.config.member(ctx.author).all()
         if config["custom_prefixes"] == []:
+            return
+        if ctx.message in self.cache_messages.append(ctx.message):
+            self.cache_messages.remove(ctx.message)
             return
         raise
 
@@ -52,6 +56,7 @@ class MemberPrefix(commands.Cog):
         if ctx is None:
             return
         if ctx.valid:
+            self.cache_messages.append(ctx.message)
             await self.bot.invoke(ctx)
 
     @commands.command(aliases=["memberprefixes"])
