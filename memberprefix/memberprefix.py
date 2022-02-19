@@ -1,8 +1,6 @@
-from importlib.metadata import packages_distributions
 import discord
 import typing
 from redbot.core import commands, Config
-from redbot.core.bot import Red as Bot
 
 # Credits:
 # The idea for this cog came from @OnlyEli on Red cogs support! (https://discord.com/channels/240154543684321280/430582201113903114/944075297127538730)
