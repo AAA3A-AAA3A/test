@@ -20,9 +20,10 @@ from redbot.core.utils.chat_formatting import box, pagify
 
 MEDICAT_GUILD = 829469886681972816
 VENTOY_UPDATES_CHANNEL = 831224763162165278
-MODERATORS_ROLE = 829472084454670346
-DEVELOPER_ROLE = 883612487881195520
-MEMBERS_ROLE = 829538904720932884
+
+# MODERATORS_ROLE = 829472084454670346
+# DEVELOPER_ROLE = 883612487881195520
+# MEMBERS_ROLE = 829538904720932884
 
 TEST_GUILD = 886147551890399253
 # MEDICAT_GUILD = 886147551890399253
@@ -146,7 +147,7 @@ class Medicat(commands.Cog):
             result = env["func"]()
             return result
 
-        for name in CUSTOM_COMMANDS:
+        for name, text in CUSTOM_COMMANDS.items():
             self.bot.remove_command(name)
             command_str = """
 def in_medicat_guild():
@@ -168,8 +169,9 @@ async def {name}(ctx):
     await ctx.send(embed=embed)
 return {name}
 """.format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name)
-            command = get_function_from_str(self.bot, command_str)
+            command: commands.command = get_function_from_str(self.bot, command_str)
             command.name = name
+            command.description = text["title"]
             self.bot.add_command(command)
 
     def remove_custom_commands(self):
