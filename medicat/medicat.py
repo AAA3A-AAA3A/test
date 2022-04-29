@@ -57,6 +57,7 @@ class Medicat(commands.Cog):
         }
         self.config.register_global(**self.medicat_global)
 
+        self.__func_red__ = ["cog_unload"]
         self.cogsutils = CogsUtils(cog=self)
         self.cogsutils._setup()
         
@@ -65,6 +66,13 @@ class Medicat(commands.Cog):
             self.add_custom_commands()
         except Exception as e:
             self.log.error(f"An error occurred while adding the custom_commands.", exc_info=e)
+
+    def cog_unload(self):
+        try:
+            self.remove_custom_commands()
+        except Exception as e:
+            self.log.error(f"An error occurred while removing the custom_commands.", exc_info=e)
+        self.cogsutils._end()
 
     async def ventoy_updates(self):
         guild = self.bot.get_guild(MEDICAT_GUILD)
@@ -162,6 +170,10 @@ return {name}
             command = get_function_from_str(self.bot, command_str)
             command.name = name
             self.bot.add_command(command)
+
+    def remove_custom_commands(self):
+        for name, text in CUSTOM_COMMANDS:
+            self.bot.remove_command(name)
 
     @commands.guild_only()
     @in_medicat_guild()
