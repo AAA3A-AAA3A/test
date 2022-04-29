@@ -61,7 +61,7 @@ class Medicat(commands.Cog):
         if last_ventoy_version >= ventoy_version:
             return
         
-        await self.config.last_ventoy_version.set(ventoy_version)
+        await self.config.last_ventoy_version.set(ventoy_version_str)
 
         message = f"Ventoy v{ventoy_version} has been released!\nhttps://ventoy.net/en/index.html"
         hook = await CogsUtils(bot=self.bot).get_hook(channel)
