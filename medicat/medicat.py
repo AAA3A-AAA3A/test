@@ -145,7 +145,7 @@ class Medicat(commands.Cog):
             result = env["func"]()
             return result
 
-        for name, text in CUSTOM_COMMANDS:
+        for name, text in CUSTOM_COMMANDS.items():
             self.bot.remove_command(name)
             command_str = """
 def in_medicat_guild():
@@ -172,7 +172,7 @@ return {name}
             self.bot.add_command(command)
 
     def remove_custom_commands(self):
-        for name, text in CUSTOM_COMMANDS:
+        for name, text in CUSTOM_COMMANDS.items():
             self.bot.remove_command(name)
 
     @commands.guild_only()
