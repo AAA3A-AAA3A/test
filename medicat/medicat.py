@@ -39,7 +39,7 @@ class Medicat(commands.Cog):
         self.medicat_global = {
             "last_ventoy_version": "1.0.73",
         }
-        self.config.register_guild(**self.medicat_global)
+        self.config.register_global(**self.medicat_global)
 
         self.cogsutils = CogsUtils(cog=self)
         self.cogsutils._setup()
