@@ -21,8 +21,8 @@ MODERATORS_ROLE = 829472084454670346
 DEVELOPER_ROLE = 883612487881195520
 MEMBERS_ROLE = 829538904720932884
 
-MEDICAT_GUILD = 886147551890399253
-VENTOY_UPDATES_CHANNEL = 905737223348047914
+# MEDICAT_GUILD = 886147551890399253
+# VENTOY_UPDATES_CHANNEL = 905737223348047914
 
 def _(untranslated: str):
     return untranslated
@@ -50,6 +50,8 @@ class Medicat(commands.Cog):
 
     async def ventoy_updates(self):
         guild = self.bot.get_guild(MEDICAT_GUILD)
+        if guild is None:
+            return
         channel = guild.get_channel(VENTOY_UPDATES_CHANNEL)
         last_ventoy_version_str = str(await self.config.last_ventoy_version())
         last_ventoy_version = VersionInfo.from_str(last_ventoy_version_str)
