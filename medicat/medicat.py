@@ -146,28 +146,8 @@ class Medicat(commands.Cog):
             result = env["func"]()
             return result
 
-        for name, text in CUSTOM_COMMANDS.items():
+        for name in CUSTOM_COMMANDS:
             self.bot.remove_command(name)
-            command_str = """
-def in_medicat_guild():
-    async def pred(ctx):
-        if ctx.guild.id == {MEDICAT_GUILD} or ctx.guild.id == {TEST_GUILD}:
-            return True
-        else:
-            return False
-    return commands.check(pred)
-
-@in_medicat_guild()
-@commands.command()
-async def {name}(ctx):
-    embed: discord.Embed = discord.Embed()
-    embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/882914619847479296/22ec88463059ae49099ba1aaea790bc4.webp?size=100")
-    embed.set_footer(text="Medicat USB Official", icon_url="https://cdn.discordapp.com/avatars/882914619847479296/22ec88463059ae49099ba1aaea790bc4.webp?size=100")
-    embed.title = "{title}"
-    embed.description = "{description}"
-    await ctx.send(embed=embed)
-return {name}
-""".format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name, title=text["title"], description=text["description"])
             command_str = """
 def in_medicat_guild():
     async def pred(ctx):
@@ -187,13 +167,13 @@ async def {name}(ctx):
     embed.description = CUSTOM_COMMANDS[ctx.command.name]["description"]
     await ctx.send(embed=embed)
 return {name}
-""".format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name, title=text["title"], description=text["description"])
+""".format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name)
             command = get_function_from_str(self.bot, command_str)
             command.name = name
             self.bot.add_command(command)
 
     def remove_custom_commands(self):
-        for name, text in CUSTOM_COMMANDS.items():
+        for name in CUSTOM_COMMANDS:
             self.bot.remove_command(name)
 
     @commands.guild_only()
@@ -205,6 +185,7 @@ return {name}
             message.author = ctx.guild.get_member(list(ctx.bot.owner_ids)[0]) or ctx.guild.get_member(list(ctx.bot.owner_ids)[1])
             message.content = f"{ctx.prefix}cog update medicat"
             context = await ctx.bot.get_context(message)
+            context.assume_yes = True
             await ctx.bot.invoke(context)
         except Exception as error:
             traceback_error = "".join(traceback.format_exception(type(error), error, error.__traceback__))
