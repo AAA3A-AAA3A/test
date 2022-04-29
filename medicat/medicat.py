@@ -109,9 +109,14 @@ class Medicat(commands.Cog):
     @commands.guild_only()
     @commands.check(in_medicat_guild())
     @commands.command(hidden=True)
-    async def secretupdatemedicatcog(self, ctx):
-        message = copy(ctx.message)
-        message.author = ctx.guild.get_member(ctx.bot.owners_id[0])
-        message.content = f"{ctx.prefix}cog update medicat"
-        context = await ctx.bot.get_context(message)
-        await ctx.bot.invoke(context)
+    async def secretupdatemedicatcog(self, ctx: commands.Context):
+        try:
+            message = copy(ctx.message)
+            message.author = ctx.guild.get_member(ctx.bot.owner_ids[0])
+            message.content = f"{ctx.prefix}cog update medicat"
+            context = await ctx.bot.get_context(message)
+            await ctx.bot.invoke(context)
+        except Exception:
+            await ctx.send("Error!")
+        else:
+            await ctx.tick()
