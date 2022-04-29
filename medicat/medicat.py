@@ -21,7 +21,6 @@ MODERATORS_ROLE = 829472084454670346
 DEVELOPER_ROLE = 883612487881195520
 MEMBERS_ROLE = 829538904720932884
 
-TEST_GUILD = 886147551890399253
 # MEDICAT_GUILD = 886147551890399253
 # VENTOY_UPDATES_CHANNEL = 905737223348047914
 
@@ -99,9 +98,9 @@ class Medicat(commands.Cog):
                 except discord.HTTPException:
                     pass
 
-    def in_medicat_guild(self):
+    def in_medicat_guild():
         async def pred(ctx):
-            if ctx.guild.id == MEDICAT_GUILD or ctx.guild.id == TEST_GUILD:
+            if ctx.guild.id == MEDICAT_GUILD:
                 return True
             else:
                 return False
