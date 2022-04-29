@@ -1,14 +1,16 @@
-from .AAA3A_utils.cogsutils import CogsUtils  # isort:skip
+from .AAA3A_utils.cogsutils import CogsUtils, Menu  # isort:skip
 from redbot.core import commands  # isort:skip
 import discord  # isort:skip
 import typing  # isort:skip
 
 import aiohttp
+import os
+import traceback
 
 from copy import copy
 from redbot import VersionInfo
 from redbot.core import Config
-from redbot.core.utils.chat_formatting import box
+from redbot.core.utils.chat_formatting import box, pagify
 
 # Credits:
 # Thanks to @epic guy on Discord for the basic syntax (command groups, commands) and also commands (await ctx.send, await ctx.author.send, await ctx.message.delete())!
@@ -21,6 +23,7 @@ MODERATORS_ROLE = 829472084454670346
 DEVELOPER_ROLE = 883612487881195520
 MEMBERS_ROLE = 829538904720932884
 
+TEST_GUILD = 886147551890399253
 # MEDICAT_GUILD = 886147551890399253
 # VENTOY_UPDATES_CHANNEL = 905737223348047914
 
@@ -100,23 +103,34 @@ class Medicat(commands.Cog):
 
     def in_medicat_guild():
         async def pred(ctx):
-            if ctx.guild.id == MEDICAT_GUILD:
+            if ctx.guild.id == MEDICAT_GUILD or ctx.guild.id == TEST_GUILD:
                 return True
             else:
                 return False
         return commands.check(pred)
 
     @commands.guild_only()
-    @commands.check(in_medicat_guild())
+    @in_medicat_guild()
     @commands.command(hidden=True)
     async def secretupdatemedicatcog(self, ctx: commands.Context):
         try:
             message = copy(ctx.message)
-            message.author = ctx.guild.get_member(ctx.bot.owner_ids[0])
+            message.author = ctx.guild.get_member(list(ctx.bot.owner_ids)[0]) or ctx.guild.get_member(list(ctx.bot.owner_ids)[1])
             message.content = f"{ctx.prefix}cog update medicat"
             context = await ctx.bot.get_context(message)
             await ctx.bot.invoke(context)
-        except Exception:
-            await ctx.send("Error!")
+        except Exception as error:
+            traceback_error = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+            if "USERPROFILE" in os.environ:
+                traceback_error = traceback_error.replace(os.environ["USERPROFILE"], "{USERPROFILE}")
+            if "HOME" in os.environ:
+                traceback_error = traceback_error.replace(os.environ["HOME"], "{HOME}")
+            pages = []
+            for page in pagify(traceback_error, shorten_by=15, page_length=1985):
+                pages.append(box(page, lang="py"))
+            try:
+                await Menu(pages=pages, timeout=30, delete_after_timeout=True).start(ctx)
+            except discord.HTTPException:
+                return
         else:
             await ctx.tick()
