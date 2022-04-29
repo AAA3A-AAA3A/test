@@ -1,4 +1,4 @@
-﻿from .AAA3A_utils.cogsutils import CogsUtils, Menu  # isort:skip
+from .AAA3A_utils.cogsutils import CogsUtils, Menu  # isort:skip
 from redbot.core import commands  # isort:skip
 import discord  # isort:skip
 import typing  # isort:skip
@@ -18,6 +18,9 @@ VENTOY_UPDATES_CHANNEL = 831224763162165278
 MODERATORS_ROLE = 829472084454670346
 DEVELOPER_ROLE = 883612487881195520
 MEMBERS_ROLE = 829538904720932884
+
+MEDICAT_GUILD = 886147551890399253
+VENTOY_UPDATES_CHANNEL = 905737223348047914
 
 def _(untranslated: str):
     return untranslated
