@@ -63,7 +63,7 @@ class Medicat(commands.Cog):
         
         await self.config.last_ventoy_version.set(ventoy_version_str)
 
-        message = f"Ventoy v{ventoy_version} has been released!\nhttps://ventoy.net/en/index.html"
-        hook = await CogsUtils(bot=self.bot).get_hook(channel)
-        message = await hook.send(content=message, username="Ventoy Updates", avatar_url="https://ventoy.net/static/img/ventoy.png?v=1")
+        message: str = f"Ventoy v{ventoy_version} has been released!\nhttps://ventoy.net/en/index.html"
+        hook: discord.Webhook = await CogsUtils(bot=self.bot).get_hook(channel)
+        message: discord.Message = await hook.send(content=message, username="Ventoy Updates", avatar_url="https://ventoy.net/static/img/ventoy.png?v=1")
         await message.publish()
