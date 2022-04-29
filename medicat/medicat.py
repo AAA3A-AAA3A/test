@@ -37,15 +37,6 @@ CUSTOM_COMMANDS = {
     "virus": {"title": "Why does my antivirus software blame Medicat?", "description": "Medicat USB does not contain any viruses! If an antivirus software detects one of its files as such, it is a false positive. As you know, Medicat USB contains tools that can reset a partition, find a password, and modify the system. Portable applications can be falsely flagged because of how they are cracked and packaged. For these reasons all antivirus software's 'real-time scanning' should be disabled when installing, and sometimes even when using, Medicat USB."},
     "whatmedicat": {"title": "What is Medicat USB?", "description": "Medicat USB contains tools to backup/restore data, to manage disks/partitions, to reset/bypass/find a Windows password, to use software with admin rights from a winPE, to do virus scans. In addition, it uses Ventoy, which allows you to add your own bootable tools with a simple copy and paste."}
 }
-CUSTOM_COMMANDS = {
-    "customtools": {"title": "How to add your own bootable tools (iso, wim, vhd) to Medicat USB?", "description": "a"},
-    "kofi": {"title": "How to make a donation?", "description": "b"},
-    "medicatversion": {"title": "What is the latest version of Medicat USB?", "description": "c"},
-    "menus": {"title": "How to download one of the menus?", "description": "d"},
-    "usbvhd": {"title": "What is the difference between Medicat USB and Medicat VHD?", "description": "e"},
-    "virus": {"title": "Why does my antivirus software blame Medicat?", "description": "f"},
-    "whatmedicat": {"title": "What is Medicat USB?", "description": "g"}
-}
 
 def _(untranslated: str):
     return untranslated
@@ -149,6 +140,7 @@ class Medicat(commands.Cog):
                 "bot": bot,
                 "discord": discord,
                 "commands": commands,
+                "CUSTOM_COMMANDS": CUSTOM_COMMANDS,
             }
             exec(to_compile, env)
             result = env["func"]()
@@ -173,6 +165,26 @@ async def {name}(ctx):
     embed.set_footer(text="Medicat USB Official", icon_url="https://cdn.discordapp.com/avatars/882914619847479296/22ec88463059ae49099ba1aaea790bc4.webp?size=100")
     embed.title = "{title}"
     embed.description = "{description}"
+    await ctx.send(embed=embed)
+return {name}
+""".format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name, title=text["title"], description=text["description"])
+            command_str = """
+def in_medicat_guild():
+    async def pred(ctx):
+        if ctx.guild.id == {MEDICAT_GUILD} or ctx.guild.id == {TEST_GUILD}:
+            return True
+        else:
+            return False
+    return commands.check(pred)
+
+@in_medicat_guild()
+@commands.command()
+async def {name}(ctx):
+    embed: discord.Embed = discord.Embed()
+    embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/882914619847479296/22ec88463059ae49099ba1aaea790bc4.webp?size=100")
+    embed.set_footer(text="Medicat USB Official", icon_url="https://cdn.discordapp.com/avatars/882914619847479296/22ec88463059ae49099ba1aaea790bc4.webp?size=100")
+    embed.title = CUSTOM_COMMANDS[ctx.command.name]["title"]
+    embed.description = CUSTOM_COMMANDS[ctx.command.name]["description"]
     await ctx.send(embed=embed)
 return {name}
 """.format(MEDICAT_GUILD=MEDICAT_GUILD, TEST_GUILD=TEST_GUILD, name=name, title=text["title"], description=text["description"])
