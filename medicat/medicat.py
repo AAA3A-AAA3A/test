@@ -73,7 +73,7 @@ class Medicat(commands.Cog):
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(f"https://api.github.com/repos/ventoy/Ventoy/releases/tags/{ventoy_tag_name}", timeout=3) as r:
-                        ventoy_tag_body = str(await r.json()["body"])
+                        ventoy_tag_body = str((await r.json())["body"])
             except Exception:
                 ventoy_tag_body = None
 
