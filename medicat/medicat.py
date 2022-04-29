@@ -1,3 +1,4 @@
+from concurrent.futures.process import _ResultItem
 from .AAA3A_utils.cogsutils import CogsUtils, Menu  # isort:skip
 from redbot.core import commands  # isort:skip
 import discord  # isort:skip
@@ -7,6 +8,7 @@ import aiohttp
 
 from redbot import VersionInfo
 from redbot.core import Config
+from redbot.core.utils.chat_formatting import box
 
 # Credits:
 # Thanks to @epic guy on Discord for the basic syntax (command groups, commands) and also commands (await ctx.send, await ctx.author.send, await ctx.message.delete())!
@@ -53,7 +55,7 @@ class Medicat(commands.Cog):
         last_ventoy_version = VersionInfo.from_str(last_ventoy_version_str)
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.github.com/repos/ventoy/Ventoy/git/refs/tags", timeout=3) as r:
+            async with session.get("https://api.github.com/repos/ventoy/Ventoy/git/refs/tags", timeout=3) as r:
                 ventoy_tags = await r.json()
         versions = sorted(ventoy_tags, key=lambda ventoy_version: VersionInfo.from_str(str(ventoy_version["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")))  # .index(ventoy_version) + 1
 
@@ -62,11 +64,30 @@ class Medicat(commands.Cog):
         await self.config.last_ventoy_version.set(str(ventoy_tags[len(ventoy_tags) - 1]["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev"))
 
         for version in versions:
-            ventoy_version_str = str(version["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")
+            ventoy_tag_name = str(version["ref"]).replace("refs/tags/", "")
+            ventoy_version_str = ventoy_tag_name.replace("v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")
             ventoy_version = VersionInfo.from_str(ventoy_version_str)
             if last_ventoy_version >= ventoy_version:
                 continue
+
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"https://api.github.com/repos/ventoy/Ventoy/releases/tags/{ventoy_tag_name}", timeout=3) as r:
+                        ventoy_tag_body = str(await r.json()["body"])
+            except Exception:
+                ventoy_tag_body = None
+
             message: str = f"Ventoy v{ventoy_version_str} has been released!\nhttps://ventoy.net/en/index.html"
+            if ventoy_tag_body is not None:
+                ventoy_tag_body = ventoy_tag_body.split("\n")
+                result = []
+                for x in ventoy_tag_body:
+                    if x == "See [https://www.ventoy.net/en/doc_news.html](https://www.ventoy.net/en/doc_news.html) for more details.\r":
+                        break
+                    result += x
+                ventoy_tag_body = "".join(result)
+                message += "\n" + box(ventoy_tag_body[:1999 - len(message + "\n") - len("``````")])
+
             hook: discord.Webhook = await CogsUtils(bot=self.bot).get_hook(channel)
             message: discord.Message = await hook.send(content=message, username="Ventoy Updates", avatar_url="https://ventoy.net/static/img/ventoy.png?v=1")
             if message is not None:
