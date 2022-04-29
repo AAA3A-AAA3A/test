@@ -55,7 +55,7 @@ class Medicat(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://api.github.com/repos/ventoy/Ventoy/git/refs/tags", timeout=3) as r:
                 ventoy_tags = await r.json()
-        ventoy_version_str = str(ventoy_tags[len(ventoy_tags) - 1]["ref"].replace("refs/tags/", ""))
+        ventoy_version_str = str(ventoy_tags[len(ventoy_tags) - 1]["ref"].replace("refs/tags/v", ""))
         ventoy_version = VersionInfo.from_str(ventoy_version_str)
         
         if last_ventoy_version >= ventoy_version:
@@ -63,7 +63,7 @@ class Medicat(commands.Cog):
         
         await self.config.last_ventoy_version.set(ventoy_version)
 
-        message = f"Ventoy {ventoy_version} has been released!\nhttps://ventoy.net/en/index.html"
+        message = f"Ventoy v{ventoy_version} has been released!\nhttps://ventoy.net/en/index.html"
         hook = await CogsUtils(bot=self.bot).get_hook(channel)
         message = await hook.send(content=message, username="Ventoy Updates", avatar_url="https://ventoy.net/static/img/ventoy.png?v=1")
         await message.publish()
