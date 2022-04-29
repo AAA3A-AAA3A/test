@@ -57,7 +57,7 @@ class Medicat(commands.Cog):
                 ventoy_tags = await r.json()
         versions = sorted(ventoy_tags, key=lambda ventoy_version: VersionInfo.from_str(str(ventoy_version["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")))  # .index(ventoy_version) + 1
 
-        if last_ventoy_version >= str(ventoy_tags[len(ventoy_tags) - 1]["ref"].replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")):
+        if last_ventoy_version >= VersionInfo.from_str(str(ventoy_tags[len(ventoy_tags) - 1]["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev")):
             return
         await self.config.last_ventoy_version.set(str(ventoy_tags[len(ventoy_tags) - 1]["ref"]).replace("refs/tags/v", "").replace("1.0.0", "1.0.").replace("beta", ".dev"))
 
