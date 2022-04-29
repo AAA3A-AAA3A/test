@@ -10,7 +10,7 @@ import traceback
 
 from copy import copy
 from redbot import VersionInfo
-from redbot.core import Config, checks
+from redbot.core import Config
 from redbot.core.utils.chat_formatting import box, pagify
 
 # Credits:
@@ -69,7 +69,7 @@ class Medicat(commands.Cog):
         self.__func_red__ = ["cog_unload"]
         self.cogsutils = CogsUtils(cog=self)
         self.cogsutils._setup()
-        
+
         self.cogsutils.create_loop(function=self.ventoy_updates, name="Ventoy Updates", hours=1)
         try:
             self.add_custom_commands()
@@ -140,7 +140,7 @@ class Medicat(commands.Cog):
             else:
                 return False
         return commands.check(pred)
-    
+
     def add_custom_commands(self):
 
         def get_function_from_str(bot, command, name=None):
@@ -163,7 +163,7 @@ def in_medicat_guild():
             return True
         else:
             return False
-return commands.check(pred)
+    return commands.check(pred)
 
 @in_medicat_guild()
 @commands.command()
