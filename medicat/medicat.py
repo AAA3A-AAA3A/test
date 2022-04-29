@@ -44,12 +44,12 @@ class Medicat(commands.Cog):
         self.cogsutils = CogsUtils(cog=self)
         self.cogsutils._setup()
         
-        self.cogsutils.create_loop(function=self.ventoy_updates, name="Ventoy Updates Loop", hours=1)
+        self.cogsutils.create_loop(function=self.ventoy_updates, name="Ventoy Updates", hours=1)
 
     async def ventoy_updates(self):
         guild = self.bot.get_guild(MEDICAT_GUILD)
         channel = guild.get_channel(VENTOY_UPDATES_CHANNEL)
-        last_ventoy_version_str = str(self.config.last_ventoy_version())
+        last_ventoy_version_str = str(await self.config.last_ventoy_version())
         last_ventoy_version = VersionInfo.from_str(last_ventoy_version_str)
 
         async with aiohttp.ClientSession() as session:
