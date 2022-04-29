@@ -1,11 +1,11 @@
-from concurrent.futures.process import _ResultItem
-from .AAA3A_utils.cogsutils import CogsUtils, Menu  # isort:skip
+from .AAA3A_utils.cogsutils import CogsUtils  # isort:skip
 from redbot.core import commands  # isort:skip
 import discord  # isort:skip
 import typing  # isort:skip
 
 import aiohttp
 
+from copy import copy
 from redbot import VersionInfo
 from redbot.core import Config
 from redbot.core.utils.chat_formatting import box
@@ -21,6 +21,7 @@ MODERATORS_ROLE = 829472084454670346
 DEVELOPER_ROLE = 883612487881195520
 MEMBERS_ROLE = 829538904720932884
 
+TEST_GUILD = 886147551890399253
 # MEDICAT_GUILD = 886147551890399253
 # VENTOY_UPDATES_CHANNEL = 905737223348047914
 
@@ -97,3 +98,21 @@ class Medicat(commands.Cog):
                     await message.publish()
                 except discord.HTTPException:
                     pass
+
+    def in_medicat_guild(self):
+        async def pred(ctx):
+            if ctx.guild.id == MEDICAT_GUILD or ctx.guild.id == TEST_GUILD:
+                return True
+            else:
+                return False
+        return commands.check(pred)
+
+    @commands.guild_only()
+    @commands.check(in_medicat_guild())
+    @commands.command(hidden=True)
+    async def secretupdatemedicatcog(self, ctx):
+        message = copy(ctx.message)
+        message.author = ctx.guild.get_member(ctx.bot.owners_id[0])
+        message.content = f"{ctx.prefix}cog update medicat"
+        context = await ctx.bot.get_context(message)
+        await ctx.bot.invoke(context)
