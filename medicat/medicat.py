@@ -69,7 +69,8 @@ class Medicat(commands.Cog):
             message: str = f"Ventoy v{ventoy_version_str} has been released!\nhttps://ventoy.net/en/index.html"
             hook: discord.Webhook = await CogsUtils(bot=self.bot).get_hook(channel)
             message: discord.Message = await hook.send(content=message, username="Ventoy Updates", avatar_url="https://ventoy.net/static/img/ventoy.png?v=1")
-            try:
-                await message.publish()
-            except discord.HTTPException:
-                pass
+            if message is not None:
+                try:
+                    await message.publish()
+                except discord.HTTPException:
+                    pass
