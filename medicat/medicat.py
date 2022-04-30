@@ -217,11 +217,14 @@ class Medicat(commands.Cog):
             _tool_version_str = tool_version_str.replace("-", ".").replace(".0.0", ".0").replace(".0", ".").replace("..", ".0.")
             _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 1])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
             try:
-                tool_version = VersionInfo.from_str(_tool_version_str)
+                try:
+                    tool_version = VersionInfo.from_str(_tool_version_str)
+                except ValueError:
+                    _tool_version_str = f"{_tool_version_str}.0"
+                    tool_version_str = f"{tool_version_str}.0"
+                    tool_version = VersionInfo.from_str(_tool_version_str)
             except ValueError:
-                _tool_version_str = f"{_tool_version_str}.0"
-                tool_version_str = f"{tool_version_str}.0"
-                tool_version = VersionInfo.from_str(_tool_version_str)
+                continue
             tools_versions[tool] = tool_version_str
 
             if last_tool_version >= tool_version:
