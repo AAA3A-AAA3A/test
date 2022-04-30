@@ -193,7 +193,7 @@ class Medicat(commands.Cog):
         if channel is None:
             return
         last_bootables_tools_versions_str = await self.config.last_bootables_tools_versions()
-        last_bootables_tools_versions = {x: VersionInfo.from_str(y.replace("-", ".")) for x, y in last_bootables_tools_versions_str.items()}
+        last_bootables_tools_versions = {x: VersionInfo.from_str(y.replace("-", ".").replace(".0", ".").replace("..", ".0.")) for x, y in last_bootables_tools_versions_str.items()}
 
         tools_versions = {}
         for tool in BOOTABLES_TOOLS:
@@ -211,10 +211,10 @@ class Medicat(commands.Cog):
             regex = regex[0] if isinstance(regex, typing.Tuple) and len(regex) > 0 else regex
             tool_version_str = regex
             try:
-                tool_version = VersionInfo.from_str(regex.replace("-", "."))
+                tool_version = VersionInfo.from_str(regex.replace("-", ".").replace(".0", ".").replace("..", ".0."))
             except ValueError:
                 regex = f"{regex}.0"
-                tool_version = VersionInfo.from_str(regex.replace("-", "."))
+                tool_version = VersionInfo.from_str(regex.replace("-", ".").replace(".0", ".").replace("..", ".0."))
             tools_versions[tool] = tool_version_str
 
             if last_tool_version >= tool_version:
