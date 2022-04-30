@@ -83,25 +83,25 @@ class Medicat(commands.Cog):
         self.medicat_global = {
             "last_ventoy_version": "1.0.74",
             "last_bootables_tools_versions": {
-                "Acronis Cyber Backup": "12.5",
-                "Acronis True Image": "2021.6",
+                "Acronis Cyber Backup": "12.5.0",
+                "Acronis True Image": "2021.6.0",
                 "AOMEI Backupper Technician Plus": "6.9.0",
                 "EaseUS Data Recovery Wizard": "15.1.0.0",
                 "EaseUS Todo Backup": "13.5.0",
                 "Macrium Reflect": "8.0.6635",
                 "Portable MiniTool ShadowMaker Pro Ultimate": "3.6.1",
-                "MiniTool Power Data Recovery": "10.2",
+                "MiniTool Power Data Recovery": "10.2.0",
                 "Boot Repair Disk": "2021-12-16",
                 "EasyUEFI Technician": "4.9.1",
-                "SystemRescue": "9.02",
+                "SystemRescue": "9.02.0",
                 "Ultimate Boot": "5.3.8",
-                "HDAT2": "7.4",
+                "HDAT2": "7.4.0",
                 "Memtest86 Pro": "9.4.1000",
                 "Active@ Boot Disk": "19.0.0",
                 "Acronis Disk Director": "12.5.163",
                 "AOMEI Partition Assistant Technician Edition": "9.7.0",
-                "EaseUS Partition Master": "16.8",
-                "MiniTool Partition Wizard Technician": "12.6",
+                "EaseUS Partition Master": "16.8.0",
+                "MiniTool Partition Wizard Technician": "12.6.0",
                 "NIUBI Partition Editor Technician Edition": "7.8.7",
                 "Paragon Hard Disk Manager Advanced": "17.20.11",
                 "Parted Magic": "2022.01.18",
@@ -210,7 +210,11 @@ class Medicat(commands.Cog):
             regex = regex[0] if len(regex) > 0 else None
             regex = regex[0] if isinstance(regex, typing.Tuple) and len(regex) > 0 else regex
             tool_version_str = regex
-            tool_version = VersionInfo.from_str(regex)
+            try:
+                tool_version = VersionInfo.from_str(regex)
+            except ValueError:
+                regex = f"{regex}.0"
+                tool_version = VersionInfo.from_str(regex)
             tools_versions[tool] = tool_version_str
 
             if last_tool_version >= tool_version:
