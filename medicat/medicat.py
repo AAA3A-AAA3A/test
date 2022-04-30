@@ -5,6 +5,7 @@ import typing  # isort:skip
 
 import aiohttp
 import os
+import re
 import textwrap
 import traceback
 
@@ -20,14 +21,15 @@ from redbot.core.utils.chat_formatting import box, pagify
 
 MEDICAT_GUILD = 829469886681972816
 VENTOY_UPDATES_CHANNEL = 831224763162165278
+BOOTABLES_TOOLS_UPDATES_CHANNEL = None
+PORTABLEAPPS_SOFTWARES_UPDATES_CHANNEL = None
 
 # MODERATORS_ROLE = 829472084454670346
 # DEVELOPER_ROLE = 883612487881195520
 # MEMBERS_ROLE = 829538904720932884
 
 TEST_GUILD = 886147551890399253
-# MEDICAT_GUILD = 886147551890399253
-# VENTOY_UPDATES_CHANNEL = 905737223348047914
+TEST_CHANNEL = 905737223348047914
 
 CUSTOM_COMMANDS = {
     "customtools": {"title": "How to add your own bootable tools (iso, wim, vhd) to Medicat USB?", "description": "To add your own bootable tools to Medicat USB, simply put the files in any sub-folder (except those with a `.ventoyignore` file at their root) of your USB stick. As if by magic, the new tools will appear on the Ventoy menu.\nThen you can add a custom name, icon, description, by editing the `USB\\ventoy\\ventoy.json` file following the template."},
@@ -37,6 +39,31 @@ CUSTOM_COMMANDS = {
     "usbvhd": {"title": "What is the difference between Medicat USB and Medicat VHD?", "description": "Medicat USB is a bootable menu that runs on Ventoy and contains all the necessary tools for computer troubleshooting. It contains for example Malwarebytes bootable for virus scans, Mini Windows 10 for a winPE utility and Jayro's Lockpick for all things password related.\n<https://gbatemp.net/threads/medicat-usb-a-multiboot-linux-usb-for-pc-repair.361577/>\nMedicat VHD is a full-featured windows, using the real performance of the computer. It is therefore much more powerful than Mini Windows 10. Moreover, all data is saved and you can find it again at each reboot. (Not intended to be used as an operating system).\n<https://gbatemp.net/threads/official-medicat-vhd-a-usb-bootable-windows-10-virtual-harddisk-for-pc-repair.581637/>\nJayro's Lockpick is a winPE with a menu containing all the necessary tools to remove/bypass/retrieve a Windows password or even for a server.\n<https://gbatemp.net/threads/release-jayros-lockpick-a-bootable-password-removal-suite-winpe.579278/>\nMalwarebytes bootable is a very powerful antivirus. Since it is launched from a winPE, a potential virus cannot prevent it from running properly.\n<https://gbatemp.net/threads/unofficial-malwarebytes-bootable.481046/>"},
     "virus": {"title": "Why does my antivirus software blame Medicat?", "description": "Medicat USB does not contain any viruses! If an antivirus software detects one of its files as such, it is a false positive. As you know, Medicat USB contains tools that can reset a partition, find a password, and modify the system. Portable applications can be falsely flagged because of how they are cracked and packaged. For these reasons all antivirus software's 'real-time scanning' should be disabled when installing, and sometimes even when using, Medicat USB."},
     "whatmedicat": {"title": "What is Medicat USB?", "description": "Medicat USB contains tools to backup/restore data, to manage disks/partitions, to reset/bypass/find a Windows password, to use software with admin rights from a winPE, to do virus scans. In addition, it uses Ventoy, which allows you to add your own bootable tools with a simple copy and paste."}
+}
+
+BOOTABLES_TOOLS = {
+    "Acronis Cyber Backup": {"url": "https://www.fcportables.com/acronis-cyber-backup-boot/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Acronis Cyber Backup (\d*\.\d*) Build (\d*) Multilingual BootCD"},
+    "Acronis True Image": {"url": "https://www.fcportables.com/acronis-true-image-boot/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Acronis True Image (\d*\.\d*) Build (\d*) Multilingual Boot ISO"},
+    "AOMEI Backupper Technician Plus": {"url": "https://www.fcportables.com/aomei-backupper-boot/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Portable AOMEI Backupper Technician Plus (\d*\.\d*\.\d*) \+ Boot WinPE"},
+    "EaseUS Data Recovery Wizard": {"url": "https://www.fcportables.com/easeus-recovery-wizard-winpe/", "category": "USB\\Backup_and_Recovery\\", "regex": r"EaseUS Data Recovery Wizard (\d*\.\d*\.\d*\.\d*) WinPE"},
+    "EaseUS Todo Backup": {"url": "https://www.fcportables.com/easeus-todo-backup-winpe/", "category": "USB\\Backup_and_Recovery\\", "regex": r"EaseUS Todo Backup (\d*\.\d*\.\d*) Build (\d*) Enterprise Technician WinPE"},
+    "Macrium Reflect": {"url": "https://www.fcportables.com/macrium-reflect-rescue-winpe/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Macrium Reflect (\d*\.\d*\.\d*) Server Plus WinPE \(x64\)"},
+    "Portable MiniTool ShadowMaker Pro Ultimate": {"url": "https://www.fcportables.com/shadowmaker-pro/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Portable MiniTool ShadowMaker Pro Ultimate (\d*\.\d*\.\d*) \(x64\) \+ WinPE"},
+    "MiniTool Power Data Recovery": {"url": "https://www.fcportables.com/minitool-data-recovery-winpe/", "category": "USB\\Backup_and_Recovery\\", "regex": r"Portable MiniTool Power Data Recovery (\d*\.\d*) Business Technician \+ WinPE"},
+    "Boot Repair Disk": {"url": "https://www.fcportables.com/boot-repair-disk/", "category": "USB\\Boot_Repair\\", "regex": r"Boot-Repair-Disk (\d*\-\d*\-\d*)"},
+    "EasyUEFI Technician": {"url": "https://www.fcportables.com/easyuefi-portable-winpe/", "category": "USB\\Boot_Repair\\", "regex": r"Portable EasyUEFI Technician (\d*\.\d*\.\d*) \+ WinPE \(x64\)"},
+    "SystemRescue": {"url": "https://www.fcportables.com/systemrescuecd/", "category": "USB\\Boot_Repair\\", "regex": r"SystemRescue (\d*\.\d*) Boot ISO \(x64\)"},
+    "Ultimate Boot": {"url": "https://www.fcportables.com/ultimate-boot-cd/", "category": "USB\\Boot_Repair\\", "regex": r"Ultimate Boot CD (\d*\.\d*\.\d*) Final"},
+    "HDAT2": {"url": "https://www.fcportables.com/hdat-boot/", "category": "USB\\Boot_Repair\\", "regex": r"HDAT2 (\d*\.\d*) \(ALL-IN-ONE BOOT Version\)"},
+    "Memtest86 Pro": {"url": "https://www.fcportables.com/memtest86-pro/", "category": "USB\\Boot_Repair\\", "regex": r"Memtest86 Pro (\d*\.\d*\.\d*) Retail \(ISO/USB\)"},
+    "Active@ Boot Disk": {"url": "https://www.fcportables.com/active-boot-disk/", "category": "USB\\Live_Operating_Systems\\", "regex": r"Active@ Boot Disk (\d*\.\d*\.\d*) WinPE \(x64\)"},
+    "Acronis Disk Director": {"url": "https://www.fcportables.com/acronis-disk-director-boot/", "category": "USB\\Partition_Tools\\", "regex": r"Acronis Disk Director (\d*\.\d*\.\d*) WinPE"},
+    "AOMEI Partition Assistant Technician Edition": {"url": "https://www.fcportables.com/aomei-partition-assistant-technician-winpe/", "category": "USB\\Partition_Tools\\", "regex": r"Portable AOMEI Partition Assistant Technician Edition (\d*\.\d*\.\d*) \+ WinPE"},
+    "EaseUS Partition Master": {"url": "https://www.fcportables.com/easeus-partition-master-winpe/", "category": "USB\\Partition_Tools\\", "regex": r"EaseUS Partition Master (\d*\.\d*) WinPE"},
+    "MiniTool Partition Wizard Technician": {"url": "https://www.fcportables.com/minitool-partition-wizard-portable/", "category": "USB\\Partition_Tools\\", "regex": r"Portable MiniTool Partition Wizard Technician v(\d*\.\d*) \(x64\) \+ WinPE"},
+    "NIUBI Partition Editor Technician Edition": {"url": "https://www.fcportables.com/niubi-partition-editor-portable/", "category": "USB\\Partition_Tools\\", "regex": r"Portable NIUBI Partition Editor Technician Edition (\d*\.\d*\.\d*) \(x64\) \+ Boot ISO"},
+    "Paragon Hard Disk Manager Advanced": {"url": "https://www.fcportables.com/paragon-hard-disk-manager-portable/", "category": "USB\\Partition_Tools\\", "regex": r"Portable Paragon Hard Disk Manager Advanced v(\d*\.\d*\.\d*) \(x64\) \+WinPE"},
+    "Parted Magic": {"url": "https://www.fcportables.com/parted-magic/", "category": "USB\\Partition_Tools\\", "regex": r"Parted Magic (\d*\.\d*\.\d*) Boot ISO \(x64\)"}
 }
 
 def _(untranslated: str):
@@ -54,7 +81,31 @@ class Medicat(commands.Cog):
             force_registration=True,
         )
         self.medicat_global = {
-            "last_ventoy_version": "1.0.73",
+            "last_ventoy_version": "1.0.74",
+            "last_bootables_tools_versions": {
+                "Acronis Cyber Backup": "12.5",
+                "Acronis True Image": "2021.6",
+                "AOMEI Backupper Technician Plus": "6.9.0",
+                "EaseUS Data Recovery Wizard": "15.1.0.0",
+                "EaseUS Todo Backup": "13.5.0",
+                "Macrium Reflect": "8.0.6635",
+                "Portable MiniTool ShadowMaker Pro Ultimate": "3.6.1",
+                "MiniTool Power Data Recovery": "10.2",
+                "Boot Repair Disk": "2021-12-16",
+                "EasyUEFI Technician": "4.9.1",
+                "SystemRescue": "9.02",
+                "Ultimate Boot": "5.3.8",
+                "HDAT2": "7.4",
+                "Memtest86 Pro": "9.4.1000",
+                "Active@ Boot Disk": "19.0.0",
+                "Acronis Disk Director": "12.5.163",
+                "AOMEI Partition Assistant Technician Edition": "9.7.0",
+                "EaseUS Partition Master": "16.8",
+                "MiniTool Partition Wizard Technician": "12.6",
+                "NIUBI Partition Editor Technician Edition": "7.8.7",
+                "Paragon Hard Disk Manager Advanced": "17.20.11",
+                "Parted Magic": "2022.01.18",
+            },
         }
         self.config.register_global(**self.medicat_global)
 
@@ -63,6 +114,7 @@ class Medicat(commands.Cog):
         self.cogsutils._setup()
 
         self.cogsutils.create_loop(function=self.ventoy_updates, name="Ventoy Updates", hours=1)
+        self.cogsutils.create_loop(function=self.bootables_tools_updates, name="Bootables Tools Updates", hours=1)
         try:
             self.add_custom_commands()
         except Exception as e:
@@ -80,6 +132,8 @@ class Medicat(commands.Cog):
         if guild is None:
             return
         channel = guild.get_channel(VENTOY_UPDATES_CHANNEL)
+        if channel is None:
+            return
         last_ventoy_version_str = str(await self.config.last_ventoy_version())
         last_ventoy_version = VersionInfo.from_str(last_ventoy_version_str)
 
@@ -124,6 +178,61 @@ class Medicat(commands.Cog):
                     await message.publish()
                 except discord.HTTPException:
                     pass
+
+    async def bootables_tools_updates(self):
+        # guild = self.bot.get_guild(MEDICAT_GUILD)
+        # if guild is None:
+        #     return
+        # channel = guild.get_channel(BOOTABLES_TOOLS_UPDATES_CHANNEL)
+        # if channel is None:
+        #     return
+        guild = self.bot.get_guild(TEST_GUILD)
+        if guild is None:
+            return
+        channel = guild.get_channel(TEST_CHANNEL)
+        if channel is None:
+            return
+        last_bootables_tools_versions_str = str(await self.config.last_bootables_tools_versions())
+        last_bootables_tools_versions = {x: VersionInfo.from_str(y) for x, y in last_bootables_tools_versions_str.items()}
+
+        tools_versions = {}
+        for tool in BOOTABLES_TOOLS:
+            url = BOOTABLES_TOOLS[tool]["url"]
+            last_tool_version = last_bootables_tools_versions[tool]
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=3) as r:
+                    r = await r.text()
+            for x in r.split("\n"):
+                if '"headline":' in x and '<html lang="en-US">' not in x:
+                    break
+            x = x.replace('    "headline": "', '').replace('",', '')
+            regex = re.compile(BOOTABLES_TOOLS[tool]["regex"], re.I).findall(x)
+            regex = regex[0] if len(regex) > 0 else None
+            regex = regex[0] if isinstance(regex, typing.Tuple) and len(regex) > 0 else regex
+            tool_version_str = regex
+            tool_version = VersionInfo.from_str(regex)
+            tools_versions[tool] = tool_version_str
+
+            if last_tool_version >= tool_version:
+                continue
+
+            embed: discord.Embed = discord.Embed()
+            embed.set_thumbnail(url="https://www.fcportables.com/wp-content/uploads/fcportables-logo.jpg")
+            embed.set_footer(text="From FCportables.", icon_url="https://www.fcportables.com/wp-content/uploads/fcportables-logo.jpg")
+            embed.url = url
+            embed.title = f"{tool} now has a new version!"
+            embed.description = f"[View on FCportables!]({url})"
+            embed.add_field(name="Old version:", value=last_tool_version, inline=True)
+            embed.add_field(name="New version:", value=tool_version, inline=True)
+
+            hook: discord.Webhook = await CogsUtils(bot=self.bot).get_hook(channel)
+            message: discord.Message = await hook.send(embed=embed, username="Bootables Tools Updates", avatar_url="https://www.fcportables.com/wp-content/uploads/fcportables-logo.jpg")
+            if message is not None:
+                try:
+                    await message.publish()
+                except discord.HTTPException:
+                    pass
+        await self.config.last_bootables_tools_versions.set(tools_versions)
 
     def in_medicat_guild():
         async def pred(ctx):
