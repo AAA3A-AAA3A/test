@@ -214,14 +214,13 @@ class Medicat(commands.Cog):
             regex = regex[0] if len(regex) > 0 else None
             regex = regex[0] if isinstance(regex, typing.Tuple) and len(regex) > 0 else regex
             tool_version_str: str = regex
+            _tool_version_str = tool_version_str.replace("-", ".").replace(".0.0", ".0").replace(".0", ".").replace("..", ".0.")
+            _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 1])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
             try:
-                _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 1])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
                 tool_version = VersionInfo.from_str(_tool_version_str)
             except ValueError:
-                _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 1])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
-                _tool_version_str = f"{regex}.0"
+                _tool_version_str = f"{_tool_version_str}.0"
+                tool_version_str = f"{tool_version_str}.0"
                 tool_version = VersionInfo.from_str(_tool_version_str)
             tools_versions[tool] = tool_version_str
 
