@@ -196,7 +196,7 @@ class Medicat(commands.Cog):
         last_bootables_tools_versions = {}
         for x, y in last_bootables_tools_versions_str.items():
             _y = y.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-            _y = (str("".join(list(_y)[:len(list(_y) - 2)])) + ".0") if _y.endswith(".") else _y
+            _y = (str("".join(list(_y)[:len(list(_y)) - 2])) + ".0") if _y.endswith(".") else _y
             last_bootables_tools_versions[x] = VersionInfo.from_str(_y)
 
         tools_versions = {}
@@ -216,11 +216,11 @@ class Medicat(commands.Cog):
             tool_version_str: str = regex
             try:
                 _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str) - 2)])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
+                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 2])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
                 tool_version = VersionInfo.from_str(_tool_version_str)
             except ValueError:
                 _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str) - 2)])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
+                _tool_version_str = (str("".join(list(_tool_version_str)[:len(list(_tool_version_str)) - 2])) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
                 _tool_version_str = f"{regex}.0"
                 tool_version = VersionInfo.from_str(_tool_version_str)
             tools_versions[tool] = tool_version_str
