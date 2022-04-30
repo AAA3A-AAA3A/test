@@ -192,7 +192,7 @@ class Medicat(commands.Cog):
         channel = guild.get_channel(TEST_CHANNEL)
         if channel is None:
             return
-        last_bootables_tools_versions_str = str(await self.config.last_bootables_tools_versions())
+        last_bootables_tools_versions_str = await self.config.last_bootables_tools_versions()
         last_bootables_tools_versions = {x: VersionInfo.from_str(y) for x, y in last_bootables_tools_versions_str.items()}
 
         tools_versions = {}
