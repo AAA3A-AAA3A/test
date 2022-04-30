@@ -196,7 +196,7 @@ class Medicat(commands.Cog):
         last_bootables_tools_versions = {}
         for x, y in last_bootables_tools_versions_str.items():
             _y = y.replace("-", ".").replace(".0", ".").replace("..", ".0.")
-            _y = ("".join(list(y)[:len(list(y) - 2)]) + ".0") if y.endswith(".") else y
+            _y = ("".join(list(_y)[:len(list(_y) - 2)]) + ".0") if _y.endswith(".") else _y
             last_bootables_tools_versions[x] = VersionInfo.from_str(_y)
 
         tools_versions = {}
