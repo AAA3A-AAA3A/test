@@ -193,7 +193,11 @@ class Medicat(commands.Cog):
         if channel is None:
             return
         last_bootables_tools_versions_str = await self.config.last_bootables_tools_versions()
-        last_bootables_tools_versions = {x: VersionInfo.from_str(y.replace("-", ".").replace(".0", ".").replace("..", ".0.")) for x, y in last_bootables_tools_versions_str.items()}
+        last_bootables_tools_versions = {}
+        for x, y in last_bootables_tools_versions_str.items():
+            _y = y.replace("-", ".").replace(".0", ".").replace("..", ".0.")
+            _y = ("".join(list(y)[:len(list(y) - 2)]) + ".0") if y.endswith(".") else y
+            last_bootables_tools_versions[x] = VersionInfo.from_str(_y)
 
         tools_versions = {}
         for tool in BOOTABLES_TOOLS:
@@ -209,12 +213,16 @@ class Medicat(commands.Cog):
             regex = re.compile(BOOTABLES_TOOLS[tool]["regex"], re.I).findall(x)
             regex = regex[0] if len(regex) > 0 else None
             regex = regex[0] if isinstance(regex, typing.Tuple) and len(regex) > 0 else regex
-            tool_version_str = regex
+            tool_version_str: str = regex
             try:
-                tool_version = VersionInfo.from_str(regex.replace("-", ".").replace(".0", ".").replace("..", ".0."))
+                _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
+                _tool_version_str = ("".join(list(_tool_version_str)[:len(list(_tool_version_str) - 2)]) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
+                tool_version = VersionInfo.from_str(_tool_version_str)
             except ValueError:
-                regex = f"{regex}.0"
-                tool_version = VersionInfo.from_str(regex.replace("-", ".").replace(".0", ".").replace("..", ".0."))
+                _tool_version_str = tool_version_str.replace("-", ".").replace(".0", ".").replace("..", ".0.")
+                _tool_version_str = ("".join(list(_tool_version_str)[:len(list(_tool_version_str) - 2)]) + ".0") if _tool_version_str.endswith(".") else _tool_version_str
+                _tool_version_str = f"{regex}.0"
+                tool_version = VersionInfo.from_str(_tool_version_str)
             tools_versions[tool] = tool_version_str
 
             if last_tool_version >= tool_version:
