@@ -180,16 +180,10 @@ class Medicat(commands.Cog):
                     pass
 
     async def bootables_tools_updates(self):
-        # guild = self.bot.get_guild(MEDICAT_GUILD)
-        # if guild is None:
-        #     return
-        # channel = guild.get_channel(BOOTABLES_TOOLS_UPDATES_CHANNEL)
-        # if channel is None:
-        #     return
-        guild = self.bot.get_guild(TEST_GUILD)
+        guild = self.bot.get_guild(MEDICAT_GUILD)
         if guild is None:
             return
-        channel = guild.get_channel(TEST_CHANNEL)
+        channel = guild.get_channel(BOOTABLES_TOOLS_UPDATES_CHANNEL)
         if channel is None:
             return
         last_bootables_tools_versions_str = await self.config.last_bootables_tools_versions()
