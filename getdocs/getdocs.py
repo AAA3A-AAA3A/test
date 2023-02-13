@@ -5,12 +5,13 @@ from redbot.core.bot import Red  # isort:skip
 import discord  # isort:skip
 import typing  # isort:skip
 
+import aiohttp
 import asyncio
 import functools
 import time
 from fuzzywuzzy import fuzz
-from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError
-from playwright.async_api import async_playwright
+# from playwright._impl._api_types import TimeoutError as PlaywrightTimeoutError
+# from playwright.async_api import async_playwright
 from urllib.parse import ParseResult, urljoin, urlparse
 from bs4 import BeautifulSoup, SoupStrainer, Tag
 from sphobjinv import DataObjStr, Inventory
@@ -74,17 +75,17 @@ class GetDocs(commands.Cog):
 
         self.documentations: typing.Dict[str, Source] = {}
 
-        self._playwright = None
-        self._browser = None
-        self._bcontext = None
+        # self._playwright = None
+        # self._browser = None
+        # self._bcontext = None
 
         self.__authors__ = ["AAA3A", "amurinbot"]
         self.cogsutils = CogsUtils(cog=self)
 
     async def cog_load(self):
-        self._playwright = await async_playwright().start()
-        self._browser = await self._playwright.chromium.launch()
-        self._bcontext = await self._browser.new_context()
+        # self._playwright = await async_playwright().start()
+        # self._browser = await self._playwright.chromium.launch()
+        # self._bcontext = await self._browser.new_context()
         for source in BASE_URLS:
             self.documentations[source] = Source(self, name=source, url=BASE_URLS[source]["url"], icon_url=BASE_URLS[source]["icon_url"])
             asyncio.create_task(self.documentations[source].load())
@@ -111,9 +112,9 @@ class GetDocs(commands.Cog):
                     raise RuntimeError("No results found.")
                 docs = None
                 i = 0
-                docs = await self.source.get_documentation(name)
-                while docs is None and i < len(self.results.results):
-                    docs = await self.source.get_documentation(self.results.results[i][0])
+                docs = await self.source.get_documentation(results.results[0][0])
+                while docs is None and i < len(results.results):
+                    docs = await self.source.get_documentation(results.results[i][0])
                     if docs is not None:
                         break
                     i += 1
@@ -166,7 +167,6 @@ class Source:
             "https://dpy.gh.amyr.in",
             "discord",
         )
-        self._pages = {}
 
         self._rtfm_caching_task = None
         self._docs_caching_task = None
@@ -224,23 +224,22 @@ class Source:
             ]
             return manuals
 
-        if self.name == "discord.py":
-            content = await self._get_html(self.url, "manuals")
-            try:
-                manuals = bs4(content)
-            except RuntimeError:
+        # if self.name == "discord.py":
+        #     content = await self._get_html(self.url)
+        #     try:
+        #         manuals = bs4(content)
+        #     except RuntimeError:
+        #         return
+        while self._rtfm_cache is None:
+            if self._rtfm_caching_task is None or self._rtfm_caching_task.currently_running:
                 return
-        else:
-            while self._rtfm_cache is None:
-                if self._rtfm_caching_task is None or self._rtfm_caching_task.currently_running:
-                    return
-                await asyncio.sleep(1)
-            _manuals = set([obj.uri.split("#")[0] for obj in self._rtfm_cache.objects if obj.domain != "std"])
-            manuals = []
-            for manual in _manuals:
-                if manual.endswith("#$"):
-                    manual = manual[:-2]
-                manuals.append((manual, self.url + manual))    
+            await asyncio.sleep(1)
+        _manuals = set([obj.uri.split("#")[0] for obj in self._rtfm_cache.objects if obj.domain != "std"])
+        manuals = []
+        for manual in _manuals:
+            if manual.endswith("#$"):
+                manual = manual[:-2]
+            manuals.append((manual, self.url + manual))    
     
         for name, _ in manuals:
             self._docs_caching_progress[name] = None
@@ -261,16 +260,19 @@ class Source:
         self.cog.log.debug(f"{self.name}: Successfully cached {amount}/{len(manuals)} Documentations.")
         return self._result_docs_cache
 
-    async def _get_html(self, url: str, id: str, timeout: int = 0, wait: bool = True) -> str:
-        page = await self.cog._bcontext.new_page()
-        await page.goto(url)
-        if wait:
-            try:
-                await page.wait_for_load_state("networkidle", timeout=timeout)
-            except PlaywrightTimeoutError:
-                pass
-        self._pages[id] = page
-        return await page.content()
+    async def _get_html(self, url: str, timeout: int = 0, wait: bool = True) -> str:
+        # page = await self.cog._bcontext.new_page()
+        # await page.goto(url)
+        # if wait:
+        #     try:
+        #         await page.wait_for_load_state("networkidle", timeout=timeout)
+        #     except PlaywrightTimeoutError:
+        #         pass
+        # content = await page.content()
+        async with aiohttp.ClientSession() as session:
+            async with session.request("GET", url, timeout=timeout) as r:
+                content = await r.text()
+        return content
 
     def _get_text(self, element: Tag, parsed_url: ParseResult, template: str = "[`{}`]({})"):
         if isinstance(element, Tag) and element.name == "a":
@@ -391,7 +393,7 @@ class Source:
             strainer = SoupStrainer("dl")
             soup = BeautifulSoup(content, "lxml", parse_only=strainer)
             return soup.find_all("dt", class_="sig sig-object py")
-        elements = bs4(await self._get_html(url, url))
+        elements = bs4(await self._get_html(url))
         results = []
         for element in elements:
             result = self._get_documentation(element, url)

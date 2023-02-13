@@ -1,7 +1,7 @@
 {
     "author": ["AAA3A", "amurinbot"],
     "name": "GetDocs",
-    "install_msg": "Thank you for installing this cog!\nDo `[p]help` to get the list of commands and their description.\n**Use `python -m pip install playwright` and `python -m playwright install` in your bot env!**",
+    "install_msg": "Thank you for installing this cog!\nDo `[p]help` to get the list of commands and their description.",
     "short": "A cog to get and display Sphinx docs!",
     "description": "A cog to get and display Sphinx docs. Only `discord.py`, `redbot` and `python` for the moment.",
     "tags": [
@@ -10,6 +10,6 @@
         "coding",
         "docs"
     ],
-    "requirements": ["playwright", "sphobjinv", "humanfriendly", "sentry_sdk"],
+    "requirements": ["sphobjinv", "humanfriendly", "sentry_sdk"],
     "end_user_data_statement": "This cog does not persistently store data or metadata about users."
 }
