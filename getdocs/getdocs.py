@@ -123,9 +123,9 @@ class GetDocs(commands.Cog):
                     raise RuntimeError("No results found.")
                 docs = None
                 i = 0
-                docs = await self.source.get_documentation(results.results[0][0])
+                docs = await source.get_documentation(results.results[0][0])
                 while docs is None and i < len(results.results):
-                    docs = await self.source.get_documentation(results.results[i][0])
+                    docs = await source.get_documentation(results.results[i][0])
                     if docs is not None:
                         break
                     i += 1
@@ -133,7 +133,7 @@ class GetDocs(commands.Cog):
                     raise RuntimeError("No results found.")
                 embed = docs.to_embed()
                 content = None
-                if self.source._docs_caching_task is not None and self.source._docs_caching_task.currently_running:
+                if source._docs_caching_task is not None and source._docs_caching_task.currently_running:
                     content = "⚠️ The documentation cache is not yet fully built, building now."
                 await ctx.send(content=content, embed=embed)
         except RuntimeError as e:
