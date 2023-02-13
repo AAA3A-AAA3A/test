@@ -263,7 +263,8 @@ class Source:
                 for documentation in documentations:
                     self._docs_cache.append(documentation)
                 self._docs_caching_progress[name] = True
-                self.cog.log.trace(f"{self.name}: `{name}` documentation added to documentation cache.")
+                if self.cog.cogsutils.is_dpy2:
+                    self.cog.log.trace(f"{self.name}: `{name}` documentation added to documentation cache.")
             except Exception as e:
                 self.cog.log.error(f"{self.name}: Error occured while trying to cache `{name}` documentation.", exc_info=e)
                 self._docs_caching_progress[name] = e
@@ -437,7 +438,7 @@ class Source:
             if obj.domain == "std":
                 name = f"{obj.role}: {name}"
             if self._rtfm_cache.project == "discord.py":
-                name = name.replace("discord.ext.commands.", "").replace("discord.", "")
+                name = name.replace("discord.", "")  # .replace("discord.ext.commands.", "")
             return name, original_name or name
 
         def build_uri(obj: DataObjStr) -> str:
@@ -463,5 +464,7 @@ class Source:
     async def get_documentation(self, name: str) -> Documentation:
         # if self._docs_caching_task is not None and self._docs_caching_task.currently_running:
         #     raise RuntimeError(_("Documentations cache is not yet built, building now."))
+        if self.name == "discord.py":
+            name = f"discord.{name}"
         result = discord.utils.get(self._docs_cache, name=name)
         return result
