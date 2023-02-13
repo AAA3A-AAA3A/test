@@ -219,7 +219,7 @@ class Source:
             self._result_docs_cache = {}
         self.cog.log.debug(f"{self.name}: Starting Documentations caching...")
 
-        def bs4(content: str) -> typing.List[set[str, str]]:
+        def bs4(content: str) -> typing.List[typing.Set]:  # typing.List[set[str, str]]
             soup = BeautifulSoup(content, "lxml")
             if self.name == "discord.py":
                 manual_section = soup.find("section", id="manuals")
@@ -317,7 +317,7 @@ class Source:
         examples = []
 
         def format_attributes(item: Tag) -> typing.List[Attribute]:
-            results: set[str, str] = []
+            results: typing.Set = []  # set[str, str]
             items = item.find_all("li", class_="py-attribute-table-entry")
             for item in items:
                 name = " ".join(x.text for x in item.contents).strip()
@@ -340,7 +340,7 @@ class Source:
         if supported_operations := documentation.find(
             "div", class_="operations", recursive=False
         ):
-            items: typing.List[set[str, str]] = []
+            items: typing.List[typing.Set] = []  # typing.List[set[str, str]]
             for supported_operation in supported_operations.findChildren(
                 "dl", class_="describe"
             ):
